@@ -1,0 +1,43 @@
+.mynavbar {
+    background-color: #1f6f5b;
+}
+
+.nav-link[aria-current="page"] {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.eyebrow {
+    color: #90432e;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+}
+
+.quest-image {
+    height: 200px;
+    object-fit: cover;
+    object-position: center bottom;
+}
+
+.detail-image {
+    height: 420px;
+    object-fit: cover;
+    width: 100%;
+}
+
+dt {
+    color: #66736a;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 576px) {
+    .quest-image {
+        height: 150px;
+    }
+
+    .detail-image {
+        height: 280px;
+    }
+}

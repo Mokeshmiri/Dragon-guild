@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Quest Program - Dragon Guild{% endblock %}
+
+{% block content %}
+<section class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
+    <div>
+        <p class="eyebrow">Weekly quest board</p>
+        <h1>Quest Program</h1>
+    </div>
+    {% if current_user.is_authenticated and current_user.role == "guild_master" %}
+        <a class="btn btn-success" href="{{ url_for('new_quest') }}">New Quest</a>
+    {% endif %}
+</section>
+
+<section class="bg-white border rounded p-3 mb-4" aria-label="Quest filters">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <label class="form-label" for="day">Day</label>
+            <select class="form-select" id="day" name="day">
+                <option value="">Any day</option>
+                {% for day in days %}
+                    <option value="{{ loop.index0 }}" {% if selected.day|string == loop.index0|string %}selected{% endif %}>{{ day }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <label class="form-label" for="quest_type">Type</label>
+            <select class="form-select" id="quest_type" name="quest_type">
+                <option value="">Any type</option>
+                {% for quest_type in quest_types %}
+                    <option value="{{ quest_type }}" {% if selected.quest_type == quest_type %}selected{% endif %}>{{ quest_type }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <label class="form-label" for="difficulty">Difficulty</label>
+            <select class="form-select" id="difficulty" name="difficulty">
+                <option value="">Any difficulty</option>
+                {% for difficulty in difficulties %}
+                    <option value="{{ difficulty }}" {% if selected.difficulty == difficulty %}selected{% endif %}>{{ difficulty }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <label class="form-label" for="available_role">Available role</label>
+            <select class="form-select" id="available_role" name="available_role">
+                <option value="">Any role</option>
+                {% for role in roles %}
+                    <option value="{{ role }}" {% if selected.available_role == role %}selected{% endif %}>{{ role }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto"><button class="btn btn-success" type="submit">Apply</button></div>
+        <div class="col-auto"><a class="btn btn-outline-secondary" href="{{ url_for('index') }}">Reset</a></div>
+    </form>
+</section>
+
+<section class="row g-4" aria-label="Quest sessions">
+    {% for session in sessions %}
+        <article class="col-lg-6">
+            <div class="card h-100">
+                <img class="card-img-top quest-image" src="{{ url_for('static', filename='images/' ~ session.image_filename) }}" alt="{{ session.title }} illustration">
+                <div class="card-body">
+                    <p class="eyebrow">{{ session.day_name }} {{ session.start_time }}</p>
+                    <h2 class="card-title h4">{{ session.title }}</h2>
+                    <p class="card-text text-secondary">{{ session.description }}</p>
+                    <dl class="row mb-3">
+                        <div class="col-4"><dt>Location</dt><dd>{{ session.location }}</dd></div>
+                        <div class="col-4"><dt>Type</dt><dd>{{ session.quest_type }}</dd></div>
+                        <div class="col-4"><dt>Difficulty</dt><dd>{{ session.difficulty }}</dd></div>
+                    </dl>
+                    <div class="d-flex flex-wrap gap-2 mb-3" aria-label="Available role places">
+                        {% for role in roles %}
+                            <span class="badge text-bg-warning">{{ role }}: {{ session.stats.remaining[role] }}/{{ role_capacities[role] }} left</span>
+                        {% endfor %}
+                    </div>
+                    <a class="btn btn-outline-success" href="{{ url_for('session_detail', session_id=session.session_id) }}">View Details</a>
+                </div>
+            </div>
+        </article>
+    {% else %}
+        <p>No quest sessions match these filters.</p>
+    {% endfor %}
+</section>
+{% endblock %}

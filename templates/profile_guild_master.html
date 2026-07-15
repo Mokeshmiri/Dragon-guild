@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Guild Master Profile - Dragon Guild{% endblock %}
+
+{% block content %}
+<header class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
+    <div>
+        <p class="eyebrow">Guild Master profile</p>
+        <h1>{{ current_user.email }}</h1>
+    </div>
+    <a class="btn btn-success" href="{{ url_for('new_quest') }}">New Quest</a>
+</header>
+
+{% for quest in quests %}
+    <article class="bg-white border rounded p-3 mb-3">
+        <header class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+            <div>
+                <h2 class="h4">{{ quest.title }}</h2>
+                <p class="text-secondary mb-0">{{ quest.quest_type }} - {{ quest.difficulty }} - {{ quest.duration_minutes }} minutes</p>
+            </div>
+            <a class="btn btn-outline-success" href="{{ url_for('new_session', quest_id=quest.id) }}">Add Session</a>
+        </header>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Day</th><th>Time</th><th>Location</th><th>Reserved</th>
+                        <th>Remaining Places</th><th>Most Requested</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in quest.sessions %}
+                        <tr>
+                            <td>{{ session.day_name }}</td>
+                            <td>{{ session.start_time }}</td>
+                            <td>{{ session.location }}</td>
+                            <td>{{ session.stats.total_reserved }}</td>
+                            <td>
+                                {% for role in roles %}
+                                    {{ role }} {{ session.stats.remaining[role] }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>{{ session.stats.most_requested|join(", ") if session.stats.most_requested else "None" }}</td>
+                            <td>
+                                <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('session_detail', session_id=session.session_id) }}">View</a>
+                                {% if not session.has_participants %}
+                                    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('edit_session', session_id=session.session_id) }}">Edit</a>
+                                    <form action="{{ url_for('delete_session', session_id=session.session_id) }}" method="post" class="d-inline">
+                                        <button class="btn btn-outline-danger btn-sm" type="submit">Cancel</button>
+                                    </form>
+                                {% else %}
+                                    <span class="badge text-bg-secondary">Locked</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="7">No sessions for this quest.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+{% endfor %}
+{% endblock %}

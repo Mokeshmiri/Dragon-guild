@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Register as an adventurer - Dragon Guild{% endblock %}
+
+{% block content %}
+<section class="col-lg-5 col-md-7 mx-auto">
+    <h1>Register as an adventurer</h1>
+    <form method="post" class="bg-white border rounded p-4">
+        <div class="mb-3">
+            <label class="form-label" for="email">Email</label>
+            <input class="form-control" id="email" type="email" name="email" value="{{ email or '' }}" required autocomplete="email">
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="password">Password</label>
+            <input class="form-control" id="password" type="password" name="password" required autocomplete="new-password">
+        </div>
+        <button class="btn btn-success" type="submit">Register</button>
+    </form>
+</section>
+{% endblock %}

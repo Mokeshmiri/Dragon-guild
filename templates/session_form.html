@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Session - Dragon Guild{% endblock %}
+
+{% block content %}
+<section class="col-lg-6 mx-auto">
+    <p class="eyebrow">{{ quest.title }}</p>
+    <h1>{{ action }} Session</h1>
+    <form method="post" class="bg-white border rounded p-4">
+        <div class="mb-3">
+            <label class="form-label" for="day">Day</label>
+            <select class="form-select" id="day" name="day" required>
+                <option value="">Choose day</option>
+                {% for day in days %}
+                    <option value="{{ loop.index0 }}" {% if session.get('day')|string == loop.index0|string %}selected{% endif %}>{{ day }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="start_time">Starting time</label>
+            <input class="form-control" id="start_time" type="time" name="start_time" value="{{ session.get('start_time', '') }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="location">Location</label>
+            <select class="form-select" id="location" name="location" required>
+                <option value="">Choose location</option>
+                {% for location in locations %}
+                    <option value="{{ location }}" {% if session.get('location') == location %}selected{% endif %}>{{ location }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="btn btn-success" type="submit">{{ action }} Session</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('profile') }}">Cancel</a>
+    </form>
+</section>
+{% endblock %}

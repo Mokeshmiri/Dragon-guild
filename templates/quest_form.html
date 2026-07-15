@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}New Quest - Dragon Guild{% endblock %}
+
+{% block content %}
+<section class="col-lg-8 mx-auto">
+    <h1>New Quest</h1>
+    <form method="post" class="row g-3 bg-white border rounded p-4">
+        <div class="col-md-6">
+            <label class="form-label" for="title">Quest title</label>
+            <input class="form-control" id="title" name="title" value="{{ values.get('title', '') }}" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label" for="duration_minutes">Duration in minutes</label>
+            <input class="form-control" id="duration_minutes" type="number" name="duration_minutes" value="{{ values.get('duration_minutes', '') }}" required min="1">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label" for="quest_type">Quest type</label>
+            <select class="form-select" id="quest_type" name="quest_type" required>
+                <option value="">Choose type</option>
+                {% for quest_type in quest_types %}
+                    <option value="{{ quest_type }}" {% if values.get('quest_type') == quest_type %}selected{% endif %}>{{ quest_type }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label" for="difficulty">Difficulty</label>
+            <select class="form-select" id="difficulty" name="difficulty" required>
+                <option value="">Choose difficulty</option>
+                {% for difficulty in difficulties %}
+                    <option value="{{ difficulty }}" {% if values.get('difficulty') == difficulty %}selected{% endif %}>{{ difficulty }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label" for="image_filename">Promotional image</label>
+            <select class="form-select" id="image_filename" name="image_filename" required>
+                <option value="">Choose image</option>
+                {% for image in image_options %}
+                    <option value="{{ image }}" {% if values.get('image_filename') == image %}selected{% endif %}>{{ image.replace('_', ' ').replace('.png', '').title() }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12">
+            <label class="form-label" for="description">Short description</label>
+            <textarea class="form-control" id="description" name="description" required rows="4">{{ values.get('description', '') }}</textarea>
+        </div>
+
+        <fieldset class="col-12 border rounded p-3">
+            <legend class="h5">First Session</legend>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label" for="day">Day</label>
+                    <select class="form-select" id="day" name="day" required>
+                        <option value="">Choose day</option>
+                        {% for day in days %}
+                            <option value="{{ loop.index0 }}" {% if values.get('day')|string == loop.index0|string %}selected{% endif %}>{{ day }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="start_time">Starting time</label>
+                    <input class="form-control" id="start_time" type="time" name="start_time" value="{{ values.get('start_time', '') }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="location">Location</label>
+                    <select class="form-select" id="location" name="location" required>
+                        <option value="">Choose location</option>
+                        {% for location in locations %}
+                            <option value="{{ location }}" {% if values.get('location') == location %}selected{% endif %}>{{ location }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+        <div class="col-12">
+            <button class="btn btn-success" type="submit">Create Quest</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('profile') }}">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
