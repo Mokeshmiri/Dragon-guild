@@ -17,12 +17,11 @@ Open http://127.0.0.1:5000. The database is `db/guild.db`.
 
 | Role | Email | Password |
 | --- | --- | --- |
-| Guild Master | `guildmaster@dragonguild.com` | `guildpass` |
-| Adventurer | `aria@dragonguild.com` | `adventurer1` |
-| Adventurer | `borin@dragonguild.com` | `adventurer1` |
-| Adventurer | `cira@dragonguild.com` | `adventurer1` |
-| Adventurer | `darin@dragonguild.com` | `adventurer1` |
-| Adventurer | `moka@dragonguild.com` | `zf@2uy8SUj` |
+| Guild Master | `master@gmail.com` | `master123` |
+| Adventurer | `aria@gmail.com` | `pass123` |
+| Adventurer | `marco@gmail.com` | `pass123` |
+| Adventurer | `mo@gmail.com` | `pass123` |
+| Adventurer | `nicola@gmail.com` | `pass123` |
 
 ## Testing
 
