@@ -189,10 +189,10 @@ def validate_quest_values(form):
 
 
 # checks overlaps with an adventurer's existing sessions
-def user_has_time_overlap(user_id, session, exclude_session_id=None):
+def user_has_time_overlap(user_id, session):
     new_start = time_to_minutes(session["start_time"])
     for participation in participations_dao.list_user_participations(user_id):
-        if exclude_session_id and participation["session_id"] == exclude_session_id:
+        if participation["session_id"] == session["session_id"]:
             continue
         if participation["day"] != session["day"]:
             continue
@@ -227,10 +227,10 @@ def validate_participation_values(form, session, existing=None):
     if existing is None and participations_dao.count_user_sessions(current_user.id) >= 3:
         errors.append("Each adventurer can join at most 3 quest sessions in the week.")
 
-    if user_has_time_overlap(current_user.id, session, session["session_id"] if existing else None):
+    if user_has_time_overlap(current_user.id, session):
         errors.append("You already joined another quest session at that time.")
 
-    if role in ROLES and places > 0:
+    if role in ROLES and 1 <= places <= 2:
         # ignore the old booking while checking an updated booking
         stats_without_user = get_session_stats(
             session["session_id"],
@@ -302,6 +302,7 @@ def session_detail(session_id):
 # registers a new adventurer
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    email = ""
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
@@ -317,18 +318,18 @@ def register():
 
         if errors:
             flash_errors(errors)
-            return render_template("register.html", email=email)
+        else:
+            users_dao.create_user(email, password)
+            flash("Registration completed. You can now log in.", "success")
+            return redirect(url_for("login"))
 
-        users_dao.create_user(email, password)
-        flash("Registration completed. You can now log in.", "success")
-        return redirect(url_for("login"))
-
-    return render_template("register.html")
+    return render_template("register.html", email=email)
 
 
 # logs in an existing user
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    email = ""
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
@@ -336,13 +337,12 @@ def login():
 
         if user is None or user["password"] != password:
             flash("Invalid email or password.", "error")
-            return render_template("login.html", email=email)
+        else:
+            login_user(User(user["id"], user["email"], user["role"]))
+            flash(f"Welcome, {user['email']}.", "success")
+            return redirect(url_for("profile"))
 
-        login_user(User(user["id"], user["email"], user["role"]))
-        flash(f"Welcome, {user['email']}.", "success")
-        return redirect(url_for("profile"))
-
-    return render_template("login.html")
+    return render_template("login.html", email=email)
 
 
 # logs out the current user
@@ -429,6 +429,7 @@ def new_quest():
     if current_user.role != "guild_master":
         abort(403)
 
+    values = {}
     if request.method == "POST":
         quest_values, quest_errors = validate_quest_values(request.form)
         session_values, session_errors = validate_session_values(
@@ -436,35 +437,32 @@ def new_quest():
             quest_values["duration_minutes"],
         )
         errors = quest_errors + session_errors
+        values = quest_values.copy()
+        values.update(session_values)
+
         if errors:
             flash_errors(errors)
-            values = quest_values.copy()
-            values.update(session_values)
-            return render_template(
-                "quest_form.html",
-                values=values,
-                image_options=IMAGE_OPTIONS,
-                days=DAYS,
-                locations=LOCATIONS,
-                quest_types=QUEST_TYPES,
-                difficulties=DIFFICULTIES,
+        else:
+            quest_id = quests_dao.create_quest(
+                quest_values["title"],
+                quest_values["duration_minutes"],
+                quest_values["quest_type"],
+                quest_values["difficulty"],
+                quest_values["description"],
+                quest_values["image_filename"],
             )
-
-        quest_id = quests_dao.create_quest(
-            quest_values["title"],
-            quest_values["duration_minutes"],
-            quest_values["quest_type"],
-            quest_values["difficulty"],
-            quest_values["description"],
-            quest_values["image_filename"],
-        )
-        sessions_dao.create_session(quest_id, session_values["day"], session_values["start_time"], session_values["location"])
-        flash("Quest and first session created.", "success")
-        return redirect(url_for("profile"))
+            sessions_dao.create_session(
+                quest_id,
+                session_values["day"],
+                session_values["start_time"],
+                session_values["location"],
+            )
+            flash("Quest and first session created.", "success")
+            return redirect(url_for("profile"))
 
     return render_template(
         "quest_form.html",
-        values={},
+        values=values,
         image_options=IMAGE_OPTIONS,
         days=DAYS,
         locations=LOCATIONS,
@@ -484,27 +482,20 @@ def new_session(quest_id):
     if quest is None:
         abort(404)
 
+    session = {}
     if request.method == "POST":
-        values, errors = validate_session_values(request.form, quest["duration_minutes"])
+        session, errors = validate_session_values(request.form, quest["duration_minutes"])
         if errors:
             flash_errors(errors)
-            return render_template(
-                "session_form.html",
-                quest=quest,
-                session=values,
-                action="Create",
-                days=DAYS,
-                locations=LOCATIONS,
-            )
-
-        sessions_dao.create_session(quest_id, values["day"], values["start_time"], values["location"])
-        flash("Quest session created.", "success")
-        return redirect(url_for("profile"))
+        else:
+            sessions_dao.create_session(quest_id, session["day"], session["start_time"], session["location"])
+            flash("Quest session created.", "success")
+            return redirect(url_for("profile"))
 
     return render_template(
         "session_form.html",
         quest=quest,
-        session={},
+        session=session,
         action="Create",
         days=DAYS,
         locations=LOCATIONS,
@@ -533,18 +524,10 @@ def edit_session(session_id):
         if errors:
             flash_errors(errors)
             session.update(values)
-            return render_template(
-                "session_form.html",
-                quest=session,
-                session=session,
-                action="Update",
-                days=DAYS,
-                locations=LOCATIONS,
-            )
-
-        sessions_dao.update_session(session_id, values["day"], values["start_time"], values["location"])
-        flash("Quest session updated.", "success")
-        return redirect(url_for("profile"))
+        else:
+            sessions_dao.update_session(session_id, values["day"], values["start_time"], values["location"])
+            flash("Quest session updated.", "success")
+            return redirect(url_for("profile"))
 
     return render_template(
         "session_form.html",

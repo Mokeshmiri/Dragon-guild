@@ -31,13 +31,3 @@ dt {
     color: #66736a;
     font-size: 0.85rem;
 }
-
-@media (max-width: 576px) {
-    .quest-image {
-        height: 150px;
-    }
-
-    .detail-image {
-        height: 280px;
-    }
-}

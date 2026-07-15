@@ -1,17 +1,17 @@
 # Dragon Guild
 
-Small Flask and SQLite exam project for managing a fantasy adventure guild.
+A Flask and SQLite application for managing a weekly fantasy guild program.
+
+Website: https://mokeshmiri.pythonanywhere.com/
 
 ## Run locally
 
 ```bash
-pip3.12 install -r requirements.txt
+pip install -r requirements.txt
 flask --app app run
 ```
 
-Then open `http://127.0.0.1:5000`.
-
-The ready SQLite database is `db/guild.db`. It was created with DB Browser for SQLite, as in Lab 8.
+Open http://127.0.0.1:5000. The database is `db/guild.db`.
 
 ## Test accounts
 
@@ -26,18 +26,8 @@ The ready SQLite database is `db/guild.db`. It was created with DB Browser for S
 
 ## Testing
 
-Target device: desktop.
-
-Simulated current time: Monday 10:00.
-
-Participations for sessions starting within 8 simulated hours are locked. Later participations can still be modified or cancelled.
+The target device is desktop. The simulated current time is Monday at 10:00.
 
 - Monday 12:00 has a fully booked Warrior role and locked participations.
-- Monday 20:00 has no participants, so the Guild Master can edit or cancel it.
-- Existing sample data includes all three roles and at least two sessions per day.
-
-## PythonAnywhere
-
-Upload the project to PythonAnywhere and set the WSGI file to import `app` from `app.py`.
-
-Deployment URL: add the final PythonAnywhere URL here after uploading.
+- Friday 10:00 has no participants, so the Guild Master can edit or cancel it.
+- The sample data includes all three roles and two sessions for every day.
